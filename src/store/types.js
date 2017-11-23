@@ -2,9 +2,10 @@ export const ACTION_TYPES = {
   GET_ETH_ABSTRACTION: "get_eth_abstraction",
   GET_COINBASE: "get_coinbase",
   GET_GAS_PRICE: "get_gas_price",
+  GET_CONTRACT_ADDRESS: "get_contract_address",
 
-  EVENTS: {
-    GET_EVENT_ETH_PROVIDER: "get_event_eth_provider"
+  STAGES: {
+    GET_STAGES: "get_stages"
   }
 };
 
@@ -14,7 +15,10 @@ export const MUTATION_TYPES = {
   COMMIT_TRADE_CONTRACT: "commit_trade_contract",
   COMMIT_GAS_PRICE: "commit_gas_price",
 
-  EVENTS: {
-    COMMIT_EVENT_ETH_PROVIDER: "commit_event_eth_provider"
+  STAGES: {
+    COMMIT_STAGE_OPENED: "commit_stage_opened",
+    COMMIT_STAGE_DEPOSITED: "commit_stage_deposited",
+    COMMIT_STAGE_CONFIRMED: "commit_stage_confirmed",
+    COMMIT_STAGE_LOADED: "commit_stage_loaded"
   }
 }

@@ -3,6 +3,7 @@ export default {
   UNDEFINED: -1,
   DRAFTED: 0,
   DEPLOYED: 1,
-  CONFIRMED: 2,
-  CLOSED: 3
+  DEPOSITED: 2,
+  WAITING_CONFIRMATIONS: 3,
+  CLOSED: 4
 }
