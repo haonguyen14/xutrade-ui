@@ -1,7 +1,7 @@
 <template>
-  <div class="new-trade full-page-height">
+  <div class="new-trade">
     <div class="container-fluid full-page-height">
-      <div class="row full-page-height">
+      <div class="row">
         <div class="col contract-content">
           <div class="trade-form-header">
             <h1>Contract to Trade Coin</h1>
@@ -32,18 +32,34 @@
             </div>
 
             <div class="row">
-        <div class="col form-group">
-          <div>
-            Sau khi contract được tạo trên ethereum blockchain, bên B sẽ chuyển khoản với
-            số tiền phải trả vào địa chỉ contract.
-          </div>
+              <div class="col form-group">
+                <div>
+                  Sau khi contract được tạo trên ethereum blockchain, bên B sẽ chuyển khoản với
+                  số tiền phải trả vào địa chỉ contract.
+                </div>
 
-          <div style="margin-top: 10px">
-            Sau khi bên A chuyển coins cho bên B, A và B phải cùng xác nhận giao dịch thành công.
-            Khi đó, bên A sẽ được nhận ethers từ contract. Giao dịch kết thúc!
-          </div>
-        </div>
-      </div>
+                <div style="margin-top: 10px">
+                  Sau khi bên A chuyển coins cho bên B, A và B phải cùng xác nhận giao dịch thành công.
+                  Khi đó, bên A sẽ được nhận ethers từ contract. Giao dịch kết thúc!
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col contract-stages">
+                <div>
+                  Tiến trình: {{progress.status}}
+                </div>
+                <div class="progress" style="height: 10px">
+                  <div class="progress-bar bg-success"
+                        role="progressbar"
+                        :style="{ width: progress.percent + '%' }"
+                        aria-valuenow="25"
+                        aria-valuemin="0"
+                        aria-valuemax="100"></div>
+                </div>
+              </div>
+            </div>
 
             <div class="row">
               <div class="col">
@@ -88,7 +104,8 @@ export default {
       name: "",
       amount: "",
       price: "",
-      key: ""
+      key: "",
+      locked: false
     }
   },
 
@@ -114,6 +131,14 @@ export default {
     },
 
     buttonText: function() {
+      if(!this.$store.state.stages.stageLoaded) {
+        return "Loading...";
+      }
+
+      if(this.locked) {
+        return "Executing..."
+      }
+
       switch(this.currentStage) {
         case contractStages.DRAFTED:
           return "Thực thi contract";
@@ -128,14 +153,35 @@ export default {
     },
 
     actionEnabled: function() {
-      return this.$store.state.stages.stageLoaded &&
+      return !this.locked && this.$store.state.stages.stageLoaded &&
                 (this.currentStage !== contractStages.CLOSED);
+    },
+
+    progress: function() {
+      if(!this.$store.state.stages.stageLoaded) {
+        return { percent: 0, status: '' };
+      }
+
+      switch(this.currentStage) {
+        case contractStages.DRAFTED:
+          return { percent: 20, status: 'contract mẫu (tham khảo)' };
+        case contractStages.DEPLOYED:
+          return { percent: 40, status: 'contract tải lên blockchain' };
+        case contractStages.DEPOSITED:
+          return { percent: 60, status: 'ether được chuyển vào contract' };
+        case contractStages.WAITING_CONFIRMATIONS:
+          return { percent: 80, status: 'đợi xác nhận...' };
+        case contractStages.CLOSED:
+          return { percent: 100, status: 'contract thành công' };
+      }
     }
   },
 
   methods: {
     submit: function() {
       const contract = this.$store.state.TradeContract;
+      this.locked = true;
+
       if(this.currentStage === contractStages.DRAFTED) {
         // deploying contract to blockchain
         TradeService.deploy(contract, [
@@ -149,7 +195,8 @@ export default {
           gasPrice: this.$store.state.gasPrice
         })
         .then(this.contractDeployTransaction.bind(this))
-        .catch(console.error);
+        .catch(console.error)
+        .finally(function() { this.locked = false }.bind(this));
       } else if(this.currentStage === contractStages.DEPLOYED) {
         // deposit to contract with the EXACT price
         contract.methods.price().call().then(function(totalPrice) {
@@ -159,7 +206,9 @@ export default {
             gasPrice: this.$store.state.gasPrice,
             value: totalPrice
           });
-        }.bind(this)).catch(console.error);
+        }.bind(this))
+        .catch(console.error)
+        .finally(function() { this.locked = false }.bind(this));
       } else if(this.currentStage === contractStages.DEPOSITED ||
             this.currentStage === contractStages.WAITING_CONFIRMATIONS) {
         // confirm
@@ -167,7 +216,9 @@ export default {
           from: this.$store.state.coinbase,
           gas: this.$store.state.gas,
           gasPrice: this.$store.state.gasPrice
-        }).catch(console.error);
+        })
+        .catch(console.error)
+        .finally(function() { this.locked = false }.bind(this));
       }
     },
 
@@ -246,5 +297,10 @@ export default {
   .full-page-height {
     height: 100%;
     min-height: 100%;
+  }
+
+  .contract-stages {
+    margin-top: 25px;
+    margin-bottom: 10px;
   }
 </style>
