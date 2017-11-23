@@ -3,7 +3,6 @@ import Router from 'vue-router'
 import store from '@/store'
 import NewTrade from '@/components/NewTrade'
 import Contract from '@/components/Contract'
-import Events from '@/components/Events';
 
 Vue.use(Router)
 
@@ -18,11 +17,6 @@ const router = new Router({
       path: '/contract/:contractId',
       name: 'Contract',
       component: Contract
-    },
-    {
-      path: '/test',
-      name: 'test',
-      component: Events
     }
   ]
 });

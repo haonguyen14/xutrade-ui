@@ -1,8 +1,8 @@
 import {ACTION_TYPES, MUTATION_TYPES} from './types'
 import Web3 from 'web3';
 import tradeContract from '@/contracts/tradecontract';
+import utils from '@/contracts/utils';
 
-var userRegistryAddress = "0xccab97d3fe09c2d98e6a83b09e08e0cfd6c90e85";
 
 var createContract = function(instance, contract, address) {
   return new instance.eth.Contract(contract.jsonInterface, address, {
@@ -53,5 +53,16 @@ export default {
         resolve();
       }).catch(reject);
     });
-  }
+  },
+
+  [ACTION_TYPES.GET_CONTRACT_ADDRESS] ({ commit }, transactionHash) {
+    var instance = this.state.eth;
+      return new Promise(function(resolve, reject) {
+        utils.getTransactionReceipt(instance, transactionHash).then(function(receipt) {
+          commit(MUTATION_TYPES.COMMIT_TRADE_CONTRACT,
+            createContract(instance, tradeContract, receipt.contractAddress));
+          resolve();
+        }).catch(reject);
+      });
+    }
 }

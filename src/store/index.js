@@ -4,13 +4,13 @@ import state from './state';
 import mutations from './mutations';
 import actions from  './actions';
 
-import events from './modules/events';
+import stages from './modules/stages';
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
   modules: {
-    events: events
+    stages: stages
   },
   state,
   mutations,
