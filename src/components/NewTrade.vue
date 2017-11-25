@@ -45,14 +45,6 @@
       </div>
 
       <div class="row">
-        <div class="col form-group">
-          <label for="tradeKey">Mật khẩu contract:</label>
-          <input type="text" v-model="key" disabled class="form-control" id="tradeKey">
-          <div class="invalid-feedback">Không tìm thấy contract</div>
-        </div>
-      </div>
-
-      <div class="row">
         <div class="col">
           <button type="button" class="btn btn-primary btn-lg btn-block" v-on:click="submit">
             Tạo mẫu thử contract
@@ -70,7 +62,6 @@
               centered
               title="Gửi thông tin cho bên còn lại">
       <a :href="contractUrl">{{contractUrl}}</a>
-      <p>{{key}}</p>
     </b-modal>
   </div>
 </template>
@@ -89,14 +80,12 @@ export default {
       name: '',
       amount: '',
       price: '',
-      key: generatePassword(50, false),
       contractUrl: ''
     }
   },
   methods: {
     submit: function() {
       axios.post(CREATE_TRADE_API, {
-        "contractPassword": this.key,
         "sellerAddr": this.sellerAddr,
         "buyerAddr": this.buyerAddr,
         "coinName": this.name,
@@ -106,7 +95,7 @@ export default {
     },
 
     onContractCreated: function(data) {
-      this.contractUrl = "http://localhost:8001/#/contract/" + data.data;
+      this.contractUrl = "http://localhost:8000/#/contract/" + data.data;
       this.$refs.contractCreated.show();
     }
   }

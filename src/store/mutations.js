@@ -14,6 +14,14 @@ export default {
   },
 
   [MUTATION_TYPES.COMMIT_GAS_PRICE] (state, gasPrice) {
-    state.gasPrice = gasPrice
+    state.gasPrice = gasPrice;
+  },
+
+  [MUTATION_TYPES.COMMIT_SIGNATURE_PROVIDER] (state, provider) {
+    state.signatureProvider = provider;
+  },
+
+  [MUTATION_TYPES.COMMIT_AUTHORIZATION_TOKEN] (state, token) {
+    state.token = token;
   }
 }

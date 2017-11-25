@@ -77,11 +77,14 @@
 
     <b-modal ref="keyForm" size="lg" centered :ok-only="true"
             title="Mở khoá contract"
-            :hide-header-close="true"
+            :hide-header="true"
+            :hide-footer="true"
             :no-close-on-esc="true"
-            :no-close-on-backdrop="true"
-            v-on:ok="enteredKey" v-on:cancel="cancelModal">
-      <input class="form-control form-control-lg" type="text" v-model="key">
+            :no-close-on-backdrop="true">
+      <div class="login-container">
+        <button type="button" class="btn btn-primary btn-lg btn-block"
+                  v-on:click="login">Đăng nhập</button>
+      </div>
     </b-modal>
   </div>
 </template>
@@ -93,6 +96,9 @@ import eventNames from '@/constants/events';
 import contractStages from '@/constants/stages';
 import {ACTION_TYPES, MUTATION_TYPES} from '@/store/types';
 import TradeService from './TradeService';
+import SignatureService from './SignatureService';
+import ethUtil from 'ethereumjs-util';
+import Buffer from 'buffer';
 
 export default {
   name: "Contract",
@@ -104,7 +110,6 @@ export default {
       name: "",
       amount: "",
       price: "",
-      key: "",
       locked: false
     }
   },
@@ -194,7 +199,7 @@ export default {
           gas: this.$store.state.gas,
           gasPrice: this.$store.state.gasPrice
         })
-        .then(this.contractDeployTransaction.bind(this))
+        .then(this.logTransactionHash(eventNames.DEPLOYED).bind(this))
         .catch(console.error)
         .finally(function() { this.locked = false }.bind(this));
       } else if(this.currentStage === contractStages.DEPLOYED) {
@@ -207,6 +212,7 @@ export default {
             value: totalPrice
           });
         }.bind(this))
+        .then(this.logTransactionHash(eventNames.DEPOSITED).bind(this))
         .catch(console.error)
         .finally(function() { this.locked = false }.bind(this));
       } else if(this.currentStage === contractStages.DEPOSITED ||
@@ -217,46 +223,71 @@ export default {
           gas: this.$store.state.gas,
           gasPrice: this.$store.state.gasPrice
         })
+        .then(this.logTransactionHash(eventNames.CONFIRMED).bind(this))
         .catch(console.error)
         .finally(function() { this.locked = false }.bind(this));
       }
     },
 
-    contractDeployTransaction: function(transactionHash) {
-      this.log(eventNames.DEPLOYED, JSON.stringify({
-        transactionHash: transactionHash
-      })).catch(console.error);
+    login: function(evt) {
+      evt.preventDefault();
+      var message = "signature";
+
+      SignatureService.sign(
+        this.$store.state.signatureProvider,
+        this.$store.state.eth.utils.utf8ToHex(message),
+        this.$store.state.coinbase
+      ).then(function(result) {
+        var sigParams = ethUtil.fromRpcSig(result);
+        return axios.post("/auth", {
+          address: this.$store.state.coinbase,
+          message: message,
+          hexV: ethUtil.bufferToHex(sigParams.v),
+          hexR: ethUtil.bufferToHex(sigParams.r),
+          hexS: ethUtil.bufferToHex(sigParams.s),
+        });
+      }.bind(this)).then(function(result) {
+        this.$store.commit(MUTATION_TYPES.COMMIT_AUTHORIZATION_TOKEN, result.data);
+        axios.get("/trade/" + this.$route.params["contractId"], {
+          headers: {
+            'Authorization': this.$store.state.token,
+          }
+        }).then(function(data) {
+          this.sellerAddr = data.data.sellerAddr;
+          this.buyerAddr = data.data.buyerAddr;
+          this.name = data.data.coinName;
+          this.amount = data.data.coinAmount;
+          this.price = data.data.coinPrice;
+          this.$refs.keyForm.hide()
+        }.bind(this));
+
+        axios.get("/log/" + this.$route.params["contractId"], {
+          headers: {
+            'Authorization': this.$store.state.token,
+          }
+        }).then(function(data) {
+          var map = {};
+          data.data.forEach(function(evt) { map[evt.eventType] = evt; });
+
+          var deployedStage = map[eventNames.DEPLOYED] || null;
+          if(deployedStage) {
+            var transactionHash = JSON.parse(deployedStage.eventData).transactionHash;
+            this.$store.dispatch(ACTION_TYPES.GET_CONTRACT_ADDRESS, transactionHash).then(function() {
+              this.$store.dispatch(ACTION_TYPES.STAGES.GET_STAGES);
+            }.bind(this));
+          } else {
+            this.$store.commit(MUTATION_TYPES.STAGES.COMMIT_STAGE_LOADED, true);
+          }
+        }.bind(this));
+      }.bind(this));
     },
 
-    enteredKey: function(evt) {
-      evt.preventDefault();
-      axios.post("/trade/" + this.$route.params["contractId"], {
-        key: this.key
-      }).then(function(data) {
-        this.sellerAddr = data.data.sellerAddr;
-        this.buyerAddr = data.data.buyerAddr;
-        this.name = data.data.coinName;
-        this.amount = data.data.coinAmount;
-        this.price = data.data.coinPrice;
-        this.$refs.keyForm.hide()
-      }.bind(this));
-
-      axios.post("/log/" + this.$route.params["contractId"], {
-        key: this.key
-      }).then(function(data) {
-        var map = {};
-        data.data.forEach(function(evt) { map[evt.eventType] = evt; });
-
-        var deployedStage = map[eventNames.DEPLOYED] || null;
-        if(deployedStage) {
-          var transactionHash = JSON.parse(deployedStage.eventData).transactionHash;
-          this.$store.dispatch(ACTION_TYPES.GET_CONTRACT_ADDRESS, transactionHash).then(function() {
-            this.$store.dispatch(ACTION_TYPES.STAGES.GET_STAGES);
-          }.bind(this));
-        } else {
-          this.$store.commit(MUTATION_TYPES.STAGES.COMMIT_STAGE_LOADED, true);
-        }
-      }.bind(this));
+    logTransactionHash: function(e) {
+      return function(transactionHash) {
+        this.log(eventNames.DEPLOYED, JSON.stringify({
+          transactionHash: transactionHash
+        })).catch(console.error);
+      }
     },
 
     cancelModal: function(evt) {
@@ -302,5 +333,9 @@ export default {
   .contract-stages {
     margin-top: 25px;
     margin-bottom: 10px;
+  }
+
+  .login-container {
+    margin: 10px;
   }
 </style>

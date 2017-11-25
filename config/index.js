@@ -35,7 +35,9 @@ module.exports = {
       '**': {
         target: 'http://localhost:8080',
         filter: function (pathname, req) {
-          return pathname.match('^/trade') || pathname.match('^/log')
+          return pathname.match('^/trade') ||
+                  pathname.match('^/log') ||
+                  pathname.match('^/auth');
         }
       }
     },

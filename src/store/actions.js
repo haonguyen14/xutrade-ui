@@ -1,5 +1,6 @@
 import {ACTION_TYPES, MUTATION_TYPES} from './types'
 import Web3 from 'web3';
+import Eth from 'ethjs';
 import tradeContract from '@/contracts/tradecontract';
 import utils from '@/contracts/utils';
 
@@ -18,8 +19,9 @@ export default {
 
         if (typeof web3 !== 'undefined') {
           const instance = new Web3(web3.currentProvider);
+          const signatureProvider = new Eth(web3.currentProvider);
           commit(MUTATION_TYPES.COMMIT_ETH_ABSTRACTION, instance);
-          commit(MUTATION_TYPES.COMMIT_GAS_PRICE, );
+          commit(MUTATION_TYPES.COMMIT_SIGNATURE_PROVIDER, signatureProvider);
           commit(MUTATION_TYPES.COMMIT_TRADE_CONTRACT,
             createContract(instance, tradeContract));
 
@@ -55,14 +57,24 @@ export default {
     });
   },
 
-  [ACTION_TYPES.GET_CONTRACT_ADDRESS] ({ commit }, transactionHash) {
+  [ACTION_TYPES.GET_CONTRACT_ADDRESS] ({ commit }, txHash) {
     var instance = this.state.eth;
       return new Promise(function(resolve, reject) {
-        utils.getTransactionReceipt(instance, transactionHash).then(function(receipt) {
+        utils.awaitBlockConsensus(instance, txHash, 1, 5*60, function(e, receipt) {
+          if(e) {
+            reject(e);
+            return
+          }
           commit(MUTATION_TYPES.COMMIT_TRADE_CONTRACT,
             createContract(instance, tradeContract, receipt.contractAddress));
           resolve();
-        }).catch(reject);
+        });
+        /*
+        utils.getTransactionReceipt(instance, txHash).then(function(receipt) {
+          commit(MUTATION_TYPES.COMMIT_TRADE_CONTRACT,
+            createContract(instance, tradeContract, receipt.contractAddress));
+          resolve();
+        }).catch(reject);*/
       });
     }
 }

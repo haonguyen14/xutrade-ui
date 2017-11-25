@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "axios": "^0.17.0",
+    "buffer": "^5.0.8",
+    "ethereumjs-util": "^5.1.2",
     "ethjs": "^0.3.0",
     "ethjs-filter": "^0.1.5",
     "password-generator": "^2.2.0",

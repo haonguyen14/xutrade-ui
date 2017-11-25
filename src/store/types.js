@@ -14,6 +14,8 @@ export const MUTATION_TYPES = {
   COMMIT_COINBASE: "commit_coinbase",
   COMMIT_TRADE_CONTRACT: "commit_trade_contract",
   COMMIT_GAS_PRICE: "commit_gas_price",
+  COMMIT_SIGNATURE_PROVIDER: "commit_signature_provider",
+  COMMIT_AUTHORIZATION_TOKEN: "commit_authorization_token",
 
   STAGES: {
     COMMIT_STAGE_OPENED: "commit_stage_opened",
