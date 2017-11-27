@@ -90,7 +90,7 @@ export default {
         "buyerAddr": this.buyerAddr,
         "coinName": this.name,
         "amount": this.amount,
-        "weiPerCoin": this.price
+        "weiPerCoin": this.$store.state.eth.utils.toWei(this.price, "ether")
       }).then(this.onContractCreated.bind(this));
     },
 
