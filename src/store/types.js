@@ -3,10 +3,11 @@ export const ACTION_TYPES = {
   GET_COINBASE: "get_coinbase",
   GET_GAS_PRICE: "get_gas_price",
   GET_CONTRACT_ADDRESS: "get_contract_address",
+  GET_NETWORK: "get_network",
 
-  STAGES: {
-    GET_STAGES: "get_stages"
-  }
+  EVENTS: {
+    SUBSCRIBE: "event_subscribe"
+  },
 };
 
 export const MUTATION_TYPES = {
@@ -16,11 +17,13 @@ export const MUTATION_TYPES = {
   COMMIT_GAS_PRICE: "commit_gas_price",
   COMMIT_SIGNATURE_PROVIDER: "commit_signature_provider",
   COMMIT_AUTHORIZATION_TOKEN: "commit_authorization_token",
+  COMMIT_NETWORK: "commit_network",
 
-  STAGES: {
-    COMMIT_STAGE_OPENED: "commit_stage_opened",
-    COMMIT_STAGE_DEPOSITED: "commit_stage_deposited",
-    COMMIT_STAGE_CONFIRMED: "commit_stage_confirmed",
-    COMMIT_STAGE_LOADED: "commit_stage_loaded"
-  }
+  EVENTS: {
+    SUBSCRIBE: "event_subscribe",
+    ADD_EVENT: "add_event",
+    CREATE_SUBSCRIPTION: "create_subscription",
+    SET_OBSERVED_TX: "set_observed_tx",
+    EVENT_LOADED: "event_loaded"
+  },
 }

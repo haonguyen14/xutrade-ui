@@ -48,7 +48,7 @@ export default {
           if (txInfo.blockHash != null) {
             startBlock = txInfo.blockNumber;
             savedTxInfo = txInfo;
-            console.log("mined");
+            //console.log("mined");
             pollState = stateEnum.mined;
           }
         });
@@ -57,7 +57,7 @@ export default {
             if (e) {
               return; // XXX silently drop errors
             }
-            console.log("blockNum: ", blockNum);
+            //console.log("blockNum: ", blockNum);
             if (blockNum >= (blockCount + startBlock)) {
               pollState = stateEnum.awaited;
             }

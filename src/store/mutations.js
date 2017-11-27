@@ -23,5 +23,9 @@ export default {
 
   [MUTATION_TYPES.COMMIT_AUTHORIZATION_TOKEN] (state, token) {
     state.token = token;
+  },
+
+  [MUTATION_TYPES.COMMIT_NETWORK] (state, network) {
+    state.network = network;
   }
 }

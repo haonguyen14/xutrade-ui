@@ -32,6 +32,10 @@ export default {
           dispatch(ACTION_TYPES.GET_GAS_PRICE, instance).then(function() {
             resolve();
           }).catch(reject);
+
+          dispatch(ACTION_TYPES.GET_NETWORK, instance).then(function() {
+            resolve();
+          }).catch(reject);
         } else {
           reject('Install MetaMask!')
         }
@@ -43,6 +47,15 @@ export default {
     return new Promise(function(resolve, reject) {
       instance.eth.getCoinbase().then(function(coinbase) {
         commit(MUTATION_TYPES.COMMIT_COINBASE, coinbase);
+        resolve();
+      }).catch(reject);
+    });
+  },
+
+  [ACTION_TYPES.GET_NETWORK] ({ commit }, instance) {
+    return new Promise(function(resolve, reject) {
+      instance.eth.net.getNetworkType().then(function(network) {
+        commit(MUTATION_TYPES.COMMIT_NETWORK, network);
         resolve();
       }).catch(reject);
     });
@@ -69,12 +82,6 @@ export default {
             createContract(instance, tradeContract, receipt.contractAddress));
           resolve();
         });
-        /*
-        utils.getTransactionReceipt(instance, txHash).then(function(receipt) {
-          commit(MUTATION_TYPES.COMMIT_TRADE_CONTRACT,
-            createContract(instance, tradeContract, receipt.contractAddress));
-          resolve();
-        }).catch(reject);*/
       });
     }
 }
