@@ -1,76 +1,91 @@
 <template>
-  <div class="new-trade">
+  <div class="new-trade full-page-height">
     <div class="container-fluid full-page-height">
-      <div class="row">
-        <div class="col contract-content">
-          <div class="trade-form-header">
-            <h1>Contract to Trade Coin</h1>
+      <div class="row full-page-height">
+        <div class="col-9">
+          <div class="container-fluid full-page-height">
+            <div class="row full-page-height">
+              <div class="col contract-content full-page-height">
+                <div class="trade-form-header">
+                  <h1>Contract to Trade Coin</h1>
+                </div>
+                <form class="trade-form container">
+                  <div class="row">
+                    <div class="form-group col">
+                      Địa chỉ wallet bên bán (A):
+                      <span class="contract-parameter">{{sellerAddr}}</span>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="form-group col">
+                      Địa chỉ wallet bên mua (B):
+                      <span class="contract-parameter">{{buyerAddr}}</span>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col form-group">
+                      <div>
+                        Bên A đồng ý bán cho bên B <span class="contract-parameter">{{amount}}</span>
+                        coins <span class="contract-parameter">{{name}}</span>
+                        với giá <span class="contract-parameter">{{price}}</span> ether một coin
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col form-group">
+                      <div>
+                        Sau khi contract được tạo trên ethereum blockchain, bên B sẽ chuyển khoản với
+                        số tiền phải trả vào địa chỉ contract.
+                      </div>
+
+                      <div style="margin-top: 10px">
+                        Sau khi bên A chuyển coins cho bên B, A và B phải cùng xác nhận giao dịch thành công.
+                        Khi đó, bên A sẽ được nhận ethers từ contract. Giao dịch kết thúc!
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col contract-stages">
+                      <div>
+                        Tiến trình: {{progress.status}}
+                      </div>
+                      <div class="progress" style="height: 10px">
+                        <div class="progress-bar bg-success"
+                              role="progressbar"
+                              :style="{ width: progress.percent + '%' }"
+                              aria-valuenow="25"
+                              aria-valuemin="0"
+                              aria-valuemax="100"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col">
+                      <button type="button" class="btn btn-primary btn-lg btn-block"
+                                  :disabled="!actionEnabled"
+                                  v-on:click="submit">
+                        {{buttonText}}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
           </div>
-          <form class="trade-form container">
-            <div class="row">
-              <div class="form-group col">
-                Địa chỉ wallet bên bán (A):
-                <span class="contract-parameter">{{sellerAddr}}</span>
-              </div>
-            </div>
+        </div>
 
-            <div class="row">
-              <div class="form-group col">
-                Địa chỉ wallet bên mua (B):
-                <span class="contract-parameter">{{buyerAddr}}</span>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col form-group">
-                <div>
-                  Bên A đồng ý bán cho bên B <span class="contract-parameter">{{amount}}</span>
-                  coins <span class="contract-parameter">{{name}}</span>
-                  với giá <span class="contract-parameter">{{price}}</span> ether một coin
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col form-group">
-                <div>
-                  Sau khi contract được tạo trên ethereum blockchain, bên B sẽ chuyển khoản với
-                  số tiền phải trả vào địa chỉ contract.
-                </div>
-
-                <div style="margin-top: 10px">
-                  Sau khi bên A chuyển coins cho bên B, A và B phải cùng xác nhận giao dịch thành công.
-                  Khi đó, bên A sẽ được nhận ethers từ contract. Giao dịch kết thúc!
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col contract-stages">
-                <div>
-                  Tiến trình: {{progress.status}}
-                </div>
-                <div class="progress" style="height: 10px">
-                  <div class="progress-bar bg-success"
-                        role="progressbar"
-                        :style="{ width: progress.percent + '%' }"
-                        aria-valuenow="25"
-                        aria-valuemin="0"
-                        aria-valuemax="100"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col">
-                <button type="button" class="btn btn-primary btn-lg btn-block"
-                            :disabled="!actionEnabled"
-                            v-on:click="submit">
-                  {{buttonText}}
-                </button>
-              </div>
-            </div>
-          </form>
+        <div class="col-3">
+          <div v-for="e in contractEvents">
+            <transaction
+                :tx-name="e.name"
+                :tx-hash="e.txHash"
+                @confirmed="txConfirmed"/>
+          </div>
         </div>
       </div>
     </div>
@@ -98,10 +113,14 @@ import {ACTION_TYPES, MUTATION_TYPES} from '@/store/types';
 import TradeService from './TradeService';
 import SignatureService from './SignatureService';
 import ethUtil from 'ethereumjs-util';
-import Buffer from 'buffer';
+import Transaction from './Transaction';
 
 export default {
   name: "Contract",
+
+  components:{
+    'transaction': Transaction
+  },
 
   data () {
     return {
@@ -110,29 +129,13 @@ export default {
       name: "",
       amount: "",
       price: "",
-      locked: false
+      locked: false,
     }
   },
 
   computed: {
     currentStage: function() {
-      const isOpened = this.$store.state.stages.opened;
-      const hasDeposited = this.$store.state.stages.hasDeposited;
-      const confirmations = this.$store.state.stages.confirmed;
-
-      if(isOpened === null) {
-        return contractStages.DRAFTED;
-      } else if(isOpened === true) {
-        if(confirmations.buyer || confirmations.seller || confirmations.middle) {
-          return contractStages.WAITING_CONFIRMATIONS;
-        }
-        if(hasDeposited) {
-          return contractStages.DEPOSITED;
-        }
-        return contractStages.DEPLOYED;
-      } else {
-        return contractStages.CLOSED;
-      }
+      return this.$store.getters.contractStage;
     },
 
     buttonText: function() {
@@ -141,7 +144,7 @@ export default {
       }
 
       if(this.locked) {
-        return "Executing..."
+        return "Waiting for enough confirmations..."
       }
 
       switch(this.currentStage) {
@@ -179,7 +182,11 @@ export default {
         case contractStages.CLOSED:
           return { percent: 100, status: 'contract thành công' };
       }
-    }
+    },
+
+    contractEvents: function() {
+      return this.$store.state.stages.contractEvents;
+    },
   },
 
   methods: {
@@ -199,9 +206,12 @@ export default {
           gas: this.$store.state.gas,
           gasPrice: this.$store.state.gasPrice
         })
-        .then(this.logTransactionHash(eventNames.DEPLOYED).bind(this))
+        .then(function(txHash) {
+          this.$store.commit(MUTATION_TYPES.EVENTS.SET_OBSERVED_TX, txHash);
+          this.logTransactionHash(eventNames.DEPLOYED, txHash);
+          this.loadContext(txHash);
+        }.bind(this))
         .catch(console.error)
-        .finally(function() { this.locked = false }.bind(this));
       } else if(this.currentStage === contractStages.DEPLOYED) {
         // deposit to contract with the EXACT price
         contract.methods.price().call().then(function(totalPrice) {
@@ -212,9 +222,10 @@ export default {
             value: totalPrice
           });
         }.bind(this))
-        .then(this.logTransactionHash(eventNames.DEPOSITED).bind(this))
+        .then(function(txHash) {
+          this.$store.commit(MUTATION_TYPES.EVENTS.SET_OBSERVED_TX, txHash);
+        }.bind(this))
         .catch(console.error)
-        .finally(function() { this.locked = false }.bind(this));
       } else if(this.currentStage === contractStages.DEPOSITED ||
             this.currentStage === contractStages.WAITING_CONFIRMATIONS) {
         // confirm
@@ -223,9 +234,10 @@ export default {
           gas: this.$store.state.gas,
           gasPrice: this.$store.state.gasPrice
         })
-        .then(this.logTransactionHash(eventNames.CONFIRMED).bind(this))
+        .then(function(txHash) {
+          this.$store.commit(MUTATION_TYPES.EVENTS.SET_OBSERVED_TX, txHash);
+        }.bind(this))
         .catch(console.error)
-        .finally(function() { this.locked = false }.bind(this));
       }
     },
 
@@ -269,44 +281,56 @@ export default {
           var map = {};
           data.data.forEach(function(evt) { map[evt.eventType] = evt; });
 
-          var deployedStage = map[eventNames.DEPLOYED] || null;
-          if(deployedStage) {
-            var transactionHash = JSON.parse(deployedStage.eventData).transactionHash;
-            this.$store.dispatch(ACTION_TYPES.GET_CONTRACT_ADDRESS, transactionHash).then(function() {
-              this.$store.dispatch(ACTION_TYPES.STAGES.GET_STAGES);
-            }.bind(this));
+          if(map[eventNames.DEPLOYED]) {
+            this.loadContext(JSON.parse(map[eventNames.DEPLOYED].eventData).transactionHash);
           } else {
-            this.$store.commit(MUTATION_TYPES.STAGES.COMMIT_STAGE_LOADED, true);
+            this.$store.commit(MUTATION_TYPES.EVENTS.EVENT_LOADED, true);
           }
         }.bind(this));
       }.bind(this));
     },
 
-    logTransactionHash: function(e) {
-      return function(transactionHash) {
-        this.log(eventNames.DEPLOYED, JSON.stringify({
-          transactionHash: transactionHash
-        })).catch(console.error);
+    loadContext: function(transactionHash) {
+      this.$store.dispatch(ACTION_TYPES.GET_CONTRACT_ADDRESS, transactionHash).then(function() {
+        this.$store.commit(MUTATION_TYPES.EVENTS.ADD_EVENT, {
+          id: "deployed_event",
+          name: "deployed",
+          txHash: transactionHash
+        });
+        this.$store.dispatch(ACTION_TYPES.EVENTS.SUBSCRIBE, transactionHash);
+      }.bind(this));
+    },
+
+    txConfirmed: function(txHash, txName) {
+      if(this.$store.state.stages.observedTx === txHash) {
+        console.log("Unlocked ", txHash, txName);
+        this.locked = false;
+        this.$store.commit(MUTATION_TYPES.EVENTS.SET_OBSERVED_TX, null);
       }
+    },
+
+    logTransactionHash: function(e, txHash) {
+      return axios.post("/log", {
+        tradeId: this.$route.params["contractId"],
+        eventType: e,
+        eventData: JSON.stringify({ transactionHash: txHash })
+      });
     },
 
     cancelModal: function(evt) {
       evt.preventDefault();
     },
-
-    log: function(eventType, eventData) {
-      return new Promise(function(resolve, reject) {
-        axios.post("/log", {
-          tradeId: this.$route.params["contractId"],
-          eventType: eventType,
-          eventData: eventData
-        }).then(resolve).catch(reject);
-      }.bind(this));
-    }
   },
 
   mounted () {
     this.$refs.keyForm.show()
+  },
+
+  beforeDestroy () {
+    if(this.eventPolling) {
+      console.log("Clearing intervals");
+      this.$store.commit(MUTATION_TYPES.EVENTS.DESTROY_SUBSCRIPTION);
+    }
   }
 }
 </script>
@@ -314,7 +338,6 @@ export default {
 <style scoped>
   .contract-content {
     padding-top: 100px;
-    border-right: 1px solid;
   }
 
   .trade-form {

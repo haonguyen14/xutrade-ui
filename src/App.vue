@@ -1,7 +1,18 @@
 <template>
-  <!-- JuiQx21SLGyqmqEI8Zdq INFURA -->
-  <div id="app">
-    <router-view/>
+  <div>
+    <nav class="navbar navbar-dark bg-primary">
+      <!-- Navbar content -->
+      <a class="navbar-brand" href="#">
+        Xutrade
+      </a>
+
+      <span class="navbar-text">
+        {{coinbase}} | {{network}}
+      </span>
+    </nav>
+    <div id="app">
+      <router-view/>
+    </div>
   </div>
 </template>
 
@@ -10,6 +21,15 @@ import {ACTION_TYPES} from '@/store/types'
 
 export default {
   name: 'app',
+
+  computed: {
+    coinbase: function() {
+      return this.$store.state.coinbase;
+    },
+    network: function() {
+      return this.$store.state.network;
+    }
+  },
 
   beforeCreate () {
     var $store = this.$store;
