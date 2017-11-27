@@ -200,7 +200,7 @@ export default {
           this.buyerAddr,
           this.sellerAddr,
           "0x22d491Bde2303f2f43325b2108D26f1eAbA1e32b",
-          60, this.amount, this.price
+          60, this.amount, this.$store.state.eth.utils.toWei(this.price, "ether")
         ], {
           from: this.$store.state.coinbase,
           gas: this.$store.state.gas,
@@ -269,7 +269,7 @@ export default {
           this.buyerAddr = data.data.buyerAddr;
           this.name = data.data.coinName;
           this.amount = data.data.coinAmount;
-          this.price = data.data.coinPrice;
+          this.price = this.$store.state.eth.utils.fromWei(data.data.coinPrice, "ether");
           this.$refs.keyForm.hide()
         }.bind(this));
 
