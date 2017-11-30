@@ -1,5 +1,9 @@
 FROM node:7.10.0
 
+RUN apt-get update -yq && apt-get upgrade -yq && \
+    apt-get install -yq build-essential && \
+    npm install -g node-gyp
+
 ADD package.json /tmp/package.json
 RUN cd /tmp && yarn install
 RUN mkdir -p /usr/src/app && cp -a /tmp/node_modules /usr/src/app
