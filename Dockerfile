@@ -5,7 +5,7 @@ RUN apt-get update -yq && apt-get upgrade -yq && \
     npm install -g node-gyp
 
 ADD package.json /tmp/package.json
-RUN cd /tmp && yarn install
+RUN cd /tmp && npm install
 RUN mkdir -p /usr/src/app && cp -a /tmp/node_modules /usr/src/app
 
 WORKDIR /usr/src/app
