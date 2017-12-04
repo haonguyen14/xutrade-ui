@@ -19,6 +19,8 @@
     "ethjs": "^0.3.0",
     "ethjs-filter": "^0.1.5",
     "express": "^4.16.2",
+    "jquery": "^3.2.1",
+    "materialize-css": "^0.100.2",
     "password-generator": "^2.2.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",

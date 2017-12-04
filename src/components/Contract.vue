@@ -1,106 +1,83 @@
 <template>
-  <div class="new-trade full-page-height">
-    <div class="container-fluid full-page-height">
-      <div class="row full-page-height">
-        <div class="col-9">
-          <div class="container-fluid full-page-height">
-            <div class="row full-page-height">
-              <div class="col contract-content full-page-height">
-                <div class="trade-form-header">
-                  <h1>Contract to Trade Coin</h1>
-                </div>
-                <form class="trade-form container">
-                  <div class="row">
-                    <div class="form-group col">
-                      Địa chỉ wallet bên bán (A):
-                      <span class="contract-parameter">{{sellerAddr}}</span>
-                    </div>
-                  </div>
+  <div class="new-trade">
+    <div class="row">
+      <div class="col s8">
+        <div class="trade-form card-panel blue-grey darken-1">
+          <div class="row">
+            <div class="form-group col">
+              Địa chỉ wallet bên bán (A):
+              <span class="contract-parameter">{{sellerAddr}}</span>
+            </div>
+          </div>
 
-                  <div class="row">
-                    <div class="form-group col">
-                      Địa chỉ wallet bên mua (B):
-                      <span class="contract-parameter">{{buyerAddr}}</span>
-                    </div>
-                  </div>
+          <div class="row">
+            <div class="form-group col">
+              Địa chỉ wallet bên mua (B):
+              <span class="contract-parameter">{{buyerAddr}}</span>
+            </div>
+          </div>
 
-                  <div class="row">
-                    <div class="col form-group">
-                      <div>
-                        Bên A đồng ý bán cho bên B <span class="contract-parameter">{{amount}}</span>
-                        coins <span class="contract-parameter">{{name}}</span>
-                        với giá <span class="contract-parameter">{{price}}</span> ether một coin
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col form-group">
-                      <div>
-                        Sau khi contract được tạo trên ethereum blockchain, bên B sẽ chuyển khoản với
-                        số tiền phải trả vào địa chỉ contract.
-                      </div>
-
-                      <div style="margin-top: 10px">
-                        Sau khi bên A chuyển coins cho bên B, A và B phải cùng xác nhận giao dịch thành công.
-                        Khi đó, bên A sẽ được nhận ethers từ contract. Giao dịch kết thúc!
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col contract-stages">
-                      <div>
-                        Tiến trình: {{progress.status}}
-                      </div>
-                      <div class="progress" style="height: 10px">
-                        <div class="progress-bar bg-success"
-                              role="progressbar"
-                              :style="{ width: progress.percent + '%' }"
-                              aria-valuenow="25"
-                              aria-valuemin="0"
-                              aria-valuemax="100"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col">
-                      <button type="button" class="btn btn-primary btn-lg btn-block"
-                                  :disabled="!actionEnabled"
-                                  v-on:click="submit">
-                        {{buttonText}}
-                      </button>
-                    </div>
-                  </div>
-                </form>
+          <div class="row">
+            <div class="col form-group">
+              <div>
+                Bên A đồng ý bán cho bên B <span class="contract-parameter">{{amount}}</span>
+                coins <span class="contract-parameter">{{name}}</span>
+                với giá <span class="contract-parameter">{{price}}</span> ether một coin
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="col-3">
-          <div v-for="e in contractEvents">
-            <transaction
-                :tx-name="e.name"
-                :tx-hash="e.txHash"
-                @confirmed="txConfirmed"/>
+          <div class="row">
+            <div class="col form-group">
+              <div>
+                Sau khi contract được tạo trên ethereum blockchain, bên B sẽ chuyển khoản với
+                số tiền phải trả vào địa chỉ contract.
+              </div>
+
+              <div style="margin-top: 10px">
+                Sau khi bên A chuyển coins cho bên B, A và B phải cùng xác nhận giao dịch thành công.
+                Khi đó, bên A sẽ được nhận ethers từ contract. Giao dịch kết thúc!
+              </div>
+            </div>
           </div>
+
+          <div class="row">
+            <div class="col s12 contract-stages">
+              <div>
+                Tiến trình: {{progress.status}}
+              </div>
+              <div class="progress">
+                <div class="determinate" :style="{ width: progress.percent + '%' }"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col s12">
+              <button type="button" class="btn-large submit-contract"
+                          :disabled="!actionEnabled"
+                          v-on:click="submit">
+                {{buttonText}}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col s4">
+        <div v-for="e in contractEvents">
+          <transaction
+              :tx-name="e.name"
+              :tx-hash="e.txHash"
+              @confirmed="txConfirmed"/>
         </div>
       </div>
     </div>
 
-    <b-modal ref="keyForm" size="lg" centered :ok-only="true"
-            title="Mở khoá contract"
-            :hide-header="true"
-            :hide-footer="true"
-            :no-close-on-esc="true"
-            :no-close-on-backdrop="true">
-      <div class="login-container">
-        <button type="button" class="btn btn-primary btn-lg btn-block"
-                  v-on:click="login">Đăng nhập</button>
-      </div>
-    </b-modal>
+    <div id="modal" class="modal modal-fixed-footer" style="height: 54px; top: 50%">
+      <button type="button" class="btn-large login-button"
+                v-on:click="login">Đăng nhập</button>
+   </div>
   </div>
 </template>
 
@@ -270,7 +247,7 @@ export default {
           this.name = data.data.coinName;
           this.amount = data.data.coinAmount;
           this.price = this.$store.state.eth.utils.fromWei(data.data.coinPrice, "ether");
-          this.$refs.keyForm.hide()
+          $("#modal").modal("close");
         }.bind(this));
 
         axios.get("/log/" + this.$route.params["contractId"], {
@@ -323,7 +300,10 @@ export default {
   },
 
   mounted () {
-    this.$refs.keyForm.show()
+    $('#modal').modal({
+      dismissible: false,
+      endingTop: '30%',
+    }).modal("open");
   },
 
   beforeDestroy () {
@@ -336,12 +316,17 @@ export default {
 </script>
 
 <style scoped>
+  .new-trade {
+    margin-top: 50px;
+  }
+
   .contract-content {
     padding-top: 100px;
   }
 
   .trade-form {
     text-align: left;
+    color: #fff;
   }
 
   .contract-parameter {
@@ -360,5 +345,13 @@ export default {
 
   .login-container {
     margin: 10px;
+  }
+
+  .login-button {
+    width: 100%;
+  }
+
+  .submit-contract {
+    width: 100%;
   }
 </style>

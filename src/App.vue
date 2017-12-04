@@ -1,14 +1,13 @@
 <template>
   <div>
-    <nav class="navbar navbar-dark bg-primary">
-      <!-- Navbar content -->
-      <a class="navbar-brand" href="#">
-        Xutrade
-      </a>
-
-      <span class="navbar-text">
-        {{coinbase}} | {{network}}
-      </span>
+    <nav class="blue-grey darken-4">
+      <div class="nav-wrapper">
+        <a href="#" class="brand-logo"></a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a>{{coinbase}}</a></li>
+          <li><a>{{network}}</a></li>
+        </ul>
+      </div>
     </nav>
     <div id="app">
       <router-view/>
@@ -45,11 +44,10 @@ export default {
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Arial';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;
-  text-align: center;
   min-height: 100%;
   height: 100%;
 }

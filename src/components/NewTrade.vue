@@ -1,11 +1,7 @@
 <template>
-  <div class="new-trade">
-    <div class="trade-form-header">
-      <h1>Contract to Trade Coin</h1>
-    </div>
-
+  <div class="new-trade container">
     <!-- Contract -->
-    <form class="trade-form container">
+    <div class="trade-form card-panel blue-grey darken-1">
       <div class="row">
         <div class="form-group col">
           Địa chỉ wallet bên bán (A):
@@ -23,9 +19,9 @@
       <div class="row">
         <div class="col form-group">
           <div>
-            Bên A đồng ý bán cho bên B <input class="contract-input" type="text" v-model="amount">
-            coins <input class="contract-input" type="text" v-model="name">
-            với giá <input class="contract-input" type="text" v-model="price"> ether một coin
+            Bên A đồng ý bán cho bên B <input class="contract-input" style="width: 150px" type="text" v-model="amount">
+            coins <input class="contract-input" style="width: 150px" type="text" v-model="name">
+            với giá <input class="contract-input" style="width: 150px"  type="text" v-model="price"> ether một coin
           </div>
         </div>
       </div>
@@ -45,24 +41,24 @@
       </div>
 
       <div class="row">
-        <div class="col">
-          <button type="button" class="btn btn-primary btn-lg btn-block" v-on:click="submit">
+        <div class="col s12">
+          <button class="btn-large submit-contract" type="submit" v-on:click="submit">
             Tạo mẫu thử contract
           </button>
         </div>
       </div>
-    </form>
+    </div>
 
     <!-- Status -->
     <div class="status-container">
     </div>
 
-    <b-modal ref="contractCreated"
-              size="lg"
-              centered
-              title="Gửi thông tin cho bên còn lại">
-      <a :href="contractUrl">{{contractUrl}}</a>
-    </b-modal>
+    <div id="modal" class="modal modal-fixed-footer" style="height: 160px">
+     <div class="modal-content">
+       <h4>Gửi thông tin cho bên còn lại</h4>
+       <a :href="contractUrl">{{contractUrl}}</a>
+     </div>
+   </div>
   </div>
 </template>
 
@@ -84,7 +80,9 @@ export default {
     }
   },
   methods: {
-    submit: function() {
+
+    submit: function(e) {
+      e.preventDefault();
       axios.post(CREATE_TRADE_API, {
         "sellerAddr": this.sellerAddr,
         "buyerAddr": this.buyerAddr,
@@ -96,8 +94,13 @@ export default {
 
     onContractCreated: function(data) {
       this.contractUrl = "http://localhost:8000/#/contract/" + data.data;
-      this.$refs.contractCreated.show();
+      $('#modal').modal("open");
     }
+  },
+  mounted () {
+    $('#modal').modal({
+      dismissible: false,
+    });
   }
 }
 </script>
@@ -109,12 +112,14 @@ export default {
 
   .trade-form {
     text-align: left;
+    color: #fff;
   }
 
-  .contract-input {
-      border: 0;
-      outline: 0;
-      background: transparent;
-      border-bottom: 1px solid black;
+  .submit-contract {
+    width: 100%;
+  }
+
+  input[type=text] {
+     border-bottom: 1px solid #fff;
   }
 </style>

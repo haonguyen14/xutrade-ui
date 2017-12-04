@@ -1,15 +1,10 @@
 <template>
   <div class="transaction-container">
-    <div class="card mb-3" style="max-width: 20rem;">
-      <div class="card-header ">{{txName}} ({{confirmations}})</div>
-      <div class="card-body">
-        <div class="progress" style="height: 5px;">
-          <div class="progress-bar bg-info"
-                :style="{ width: percent + '%' }"
-                role="progressbar"
-                aria-valuenow="0"
-                aria-valuemin="0"
-                aria-valuemax="100"></div>
+    <div class="card blue-grey darken-1">
+      <div class="card-content white-text">
+        <span class="card-title">{{txName}} - ({{confirmations}})</span>
+        <div class="progress">
+          <div class="determinate" :style="{ width: percent + '%' }"></div>
         </div>
       </div>
     </div>
